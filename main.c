@@ -162,6 +162,7 @@ int cadastrarDisciplina(ListaGerenciada *lista) {
 			// caso nao seja a primeira disciplina, sera adicionada sempre no final
 			else {
 				auxiliar->disciplinasFim->proximo = novaDisciplina;
+				auxiliar->disciplinasFim = novaDisciplina;
 			}
 			auxiliar->quantidadeDeDisciplinas++;
 			return 1; // encontrou o aluno
@@ -195,6 +196,7 @@ int exibirDisciplinas(Disciplina *disciplinas, int n) { // usada em exibirHistor
 		printf("->Percentual de presenca: %.1f%%\n", auxiliar->percentualDePresenca);
 		printf("->Situacao: %s\n", auxiliar->situacao);
 		printf("->Periodo: %s\n", auxiliar->periodo);
+		auxiliar = auxiliar->proximo;
 	}
 	return 1;
 }
