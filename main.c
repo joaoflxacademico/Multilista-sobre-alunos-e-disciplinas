@@ -144,8 +144,20 @@ int cadastrarDisciplina(ListaGerenciada *lista) {
 	scanf("%f", &novaDisciplina->nota);
 	printf("Insira o percentual de presenca: ");
 	scanf("%f", &novaDisciplina->percentualDePresenca);
-	printf("Insira a situacao do aluno(AP|RM|RF|TR): ");
-	scanf(" %s", novaDisciplina->situacao);
+	
+	if( novaDisciplina->nota >= 5 && novaDisciplina->percentualDePresenca > 70 ){
+	    strcpy(novaDisciplina->situacao,"AP");
+	}else{
+	    if(novaDisciplina->nota < 5){
+	        strcpy(novaDisciplina->situacao,"RM");
+	    }else{
+	        if(novaDisciplina->percentualDePresenca == 0){
+	            strcpy(novaDisciplina->situacao,"TR");
+	        }else{
+	            strcpy(novaDisciplina->situacao,"RF");
+	        }
+	    }
+	}
 	caixaBaixa(novaDisciplina->situacao);
 	
 	Aluno *auxiliar = lista->inicio;
