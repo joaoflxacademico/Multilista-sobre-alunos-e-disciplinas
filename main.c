@@ -13,7 +13,7 @@ typedef struct Disciplina {
 } Disciplina;
 
 typedef struct Aluno {
-	char nome[21];
+	char nome[50];
 	char matricula[10];
 	float media;
 	int quantidadeDeDisciplinas;
@@ -238,15 +238,19 @@ int main(){
 	ListaGerenciada *lista = (ListaGerenciada*)malloc(sizeof(ListaGerenciada));
 	iniciaListaVazia(lista);
 	
-	printf("Bem vindo!");
+	printf("Bem vindo!\n");
+	printf("\n >>> Multilista Alunos/Disciplinas! <<< \n\n\n\n");
+	
 	do {
+		system("pause");
+		system("cls");
 		printf("\nCadastrar aluno..........................1\n");
 		printf("Cadastrar disciplina de aluno............2\n");
 		printf("Remover aluno............................3\n");
 		printf("Exibir lista de alunos cadastrados.......4\n");
 		printf("Exibir historico de aluno especifico.....5\n");
 		printf("Sair.....................................0\n");
-		printf("Insura sua opcao: ");
+		printf("Insira sua opcao: ");
 		scanf("%d", &opcao);
 		
 		switch(opcao) {
@@ -273,6 +277,16 @@ int main(){
 				break;
 		}
 	} while (opcao != 0);
+	
+	// quando o programa encerra ele desaloca a lista.
+	Aluno *proximo, *atual = lista->inicio;
+	while(atual != NULL){
+		proximo = atual->proximo;
+		deletaDisciplinas(atual);
+		free(atual);
+		atual = proximo;
+	}
+	free(lista);
 	return 0;
 }
 
