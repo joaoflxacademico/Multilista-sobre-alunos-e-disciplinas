@@ -13,7 +13,7 @@ typedef struct Disciplina {
 } Disciplina;
 
 typedef struct Aluno {
-	char nome[21];
+	char nome[50];
 	char matricula[10];
 	float media;
 	int quantidadeDeDisciplinas;
@@ -33,24 +33,24 @@ void iniciaListaVazia(ListaGerenciada *lista) {
 }
 
 void caixaBaixa(char *string) {
-	for (int i = 0; i < string[i]; i++) {
+	for (int i = 0;string[i] != '\0'; i++) 
 		string[i] = tolower(string[i]);
-	}
 }
 
-// essa funcao é usada para desalocar a memoria das disciplinas quando 
-// um aluno é excluido
+// desalocar a memoria das disciplinas quando um aluno é excluido
 int deletaDisciplinas(Aluno *aluno) {
-	Disciplina *auxiliar = aluno->disciplinas;
-	if (!auxiliar)
-		return -1;
+	Disciplina *proximo, *atual = aluno->disciplinas;
+	if (!atual)  return -1;
 		
-	for (int i = 0; i < aluno->quantidadeDeDisciplinas; i++) {
-		free(aluno->disciplinas);
-		auxiliar = auxiliar->proximo;
-		aluno->disciplinas = auxiliar;
+	while(atual != NULL){
+		proximo = atual->proximo;
+		free(atual);
+		atual = proximo;
 	}
-	free(auxiliar);
+	
+	aluno->disciplinas = NULL;
+	aluno->quantidadeDeDisciplinas = 0;
+	
 	return 1;
 }
 
@@ -60,34 +60,60 @@ int cadastrarAluno(ListaGerenciada *lista) {
 		return -1;
 	
 	printf("Insira o nome do aluno: ");
-	scanf(" %s", aluno->nome);
+	fflush(stdin);
+	fgets(aluno->nome, sizeof(aluno->nome), stdin);
 	caixaBaixa(aluno->nome);
 	printf("Insira a matricula do aluno(xxxyyyzzz): ");
 	scanf(" %s", aluno->matricula);
 	aluno->media = 0;
 	aluno->quantidadeDeDisciplinas = 0;
 	aluno->disciplinas = NULL;
+	aluno->disciplinasFim = NULL;
 		
+	
 	if (lista->quant == 0) {
 		aluno->anterior = NULL;
 		aluno->proximo = NULL;
 		lista->inicio = aluno;
 		lista->fim = aluno;
+		lista->quant++;
+		printf("\nAluno foi cadastrado!");
+		return 1;
 	}
-	else {
-		aluno->anterior = lista->fim;
-		aluno->proximo = NULL;
-		lista->fim->proximo = aluno;
-		lista->fim = aluno;
+	
+	Aluno *atual = lista->inicio;
+	while(atual!= NULL){
+		if(strcmp(aluno->nome, atual->nome) == 0){
+			printf("\n Aluno ja cadastrado!");
+			free(aluno);
+			return -1;}
+		else if (strcmp(aluno->nome, atual->nome) < 0){
+			aluno->anterior = atual->anterior;
+			aluno->proximo = atual;
+			if(atual->anterior != NULL)
+				atual->anterior->proximo = aluno;
+			else lista->inicio = aluno;
+			atual->anterior = aluno;
+			lista->quant++;
+			printf("\nAluno foi cadastrado!");
+			return 1;}
+		atual = atual->proximo;
 	}
+	
+	// se chegar ao final da lista
+	aluno->anterior = lista->fim;
+	aluno->proximo = NULL;
 	lista->quant++;
+	lista->fim->proximo = aluno;
+	lista->fim = aluno;
 	return 1;
 }
 
 int removerAluno(ListaGerenciada *lista) {
 	char nome[21];
 	printf("Insira o nome do aluno que deseja remover: ");
-	scanf(" %s", nome);
+	fflush(stdin);
+	fgets(nome, sizeof(nome), stdin);
 	caixaBaixa(nome);
 	
 	Aluno *auxiliar = lista->inicio;
@@ -129,15 +155,30 @@ int removerAluno(ListaGerenciada *lista) {
 int cadastrarDisciplina(ListaGerenciada *lista) {
 	char nome[21];
 	printf("Insira o nome do aluno em que deseja cadastrar a disciplina: ");
-	scanf(" %s", nome);
+	fflush(stdin);
+	fgets(nome, sizeof(nome), stdin);
 	caixaBaixa(nome);
 	
+	// sem alunos para cadastrar disciplina
+	Aluno *auxiliar = lista->inicio;
+	if (!auxiliar)
+		return -1; 
+	
+	// retorna em auxiliar, o aluno escolhido
+	while(auxiliar != NULL){
+		if (strcmp(auxiliar->nome, nome) == 0) break;
+		else 	auxiliar = auxiliar->proximo;}
+	
+	if(auxiliar == NULL) return -1; // aluno não encontrado
+	
+	// se o aluno foi encontrado aloca uma memoria, evitando memory leaks
 	Disciplina *novaDisciplina = (Disciplina*)malloc(sizeof(Disciplina));
 	if (!novaDisciplina) 
 		return -1;
-		
+	
 	printf("Insira o nome da disciplina: ");
-	scanf(" %s", novaDisciplina->nome);
+	fflush(stdin);
+	fgets(novaDisciplina->nome, sizeof(novaDisciplina->nome),stdin);
 	printf("Insira o periodo(aaaa.x): ");
 	scanf(" %s", novaDisciplina->periodo);
 	printf("Insira a nota do aluno: ");
@@ -145,42 +186,24 @@ int cadastrarDisciplina(ListaGerenciada *lista) {
 	printf("Insira o percentual de presenca: ");
 	scanf("%f", &novaDisciplina->percentualDePresenca);
 	
-	if( novaDisciplina->nota >= 5 && novaDisciplina->percentualDePresenca > 70 ){
-	    strcpy(novaDisciplina->situacao,"AP");
-	}else{
-	    if(novaDisciplina->nota < 5){
-	        strcpy(novaDisciplina->situacao,"RM");
-	    }else{
-	        if(novaDisciplina->percentualDePresenca == 0){
-	            strcpy(novaDisciplina->situacao,"TR");
-	        }else{
-	            strcpy(novaDisciplina->situacao,"RF");
-	        }
-	    }
-	}
+	char sit[3]; // estado auxiliar
+	//estrutura de decisão baseada na precedência: TR-> RF -> RM se nenhum desses AP
+	if(novaDisciplina->percentualDePresenca == 0)       strcpy(sit,"TR");
+	else if(novaDisciplina->percentualDePresenca < 70)  strcpy(sit,"RF");
+	else if(novaDisciplina->nota < 5)  		    strcpy(sit,"RM");
+	else 						    strcpy(sit,"AP");
+	strcpy(novaDisciplina->situacao,sit);
+	auxiliar->quantidadeDeDisciplinas++;
 	
-	Aluno *auxiliar = lista->inicio;
-	if (!auxiliar)
-		return -1;
-	
-	for (int i = 0; i < lista->quant; i++) {
-		if (strcmp(auxiliar->nome, nome) == 0) {
-			novaDisciplina->proximo = NULL;
-			if (auxiliar->quantidadeDeDisciplinas == 0) {
-				auxiliar->disciplinas = novaDisciplina;
-				auxiliar->disciplinasFim = novaDisciplina;
-			}
-			// caso nao seja a primeira disciplina, sera adicionada sempre no final
-			else {
-				auxiliar->disciplinasFim->proximo = novaDisciplina;
-				auxiliar->disciplinasFim = novaDisciplina;
-			}
-			auxiliar->quantidadeDeDisciplinas++;
-			return 1; // encontrou o aluno
-		} 
-		auxiliar = auxiliar->proximo;
-	}
-	return -1; // o aluno nao foi encontrado na lista
+	//não há disciplinas cadastradas para esse aluno
+	if(auxiliar->disciplinas == NULL){
+		novaDisciplina->proximo = NULL;
+		auxiliar->disciplinas = novaDisciplina;
+		auxiliar->disciplinasFim = novaDisciplina;}
+	else{
+		novaDisciplina->proximo = auxiliar->disciplinas;
+		auxiliar->disciplinas= novaDisciplina;}
+	return 1;
 }
 
 int exibirAlunosCadastrados(ListaGerenciada *lista) {
@@ -190,8 +213,8 @@ int exibirAlunosCadastrados(ListaGerenciada *lista) {
 		
 	printf("\n----Alunos Cadastrados----\n");
 	for (int i = 0; i < lista->quant; i++) {
-		printf("[%d]%s", i, auxiliar->nome);
-		printf(",%s", auxiliar->matricula);
+		printf("\n[%d] -> %s", i, auxiliar->nome);
+		printf("- %s\n", auxiliar->matricula);
 		auxiliar = auxiliar->proximo;
 	}
 	return 1;
@@ -214,14 +237,17 @@ int exibirDisciplinas(Disciplina *disciplinas, int n) { // usada em exibirHistor
 }
 
 int exibirHistoricoDeAluno(ListaGerenciada *lista) {
-	char nome[21];
+	char nome[50];
 	printf("Insira o nome do aluno que deseja checar: ");
-	scanf(" %s", nome);
+	fflush(stdin);
+	fgets(nome, sizeof(nome), stdin);
 	caixaBaixa(nome);
 	
+	//lista vazia
 	Aluno *auxiliar = lista->inicio;
-	if (!auxiliar) 
-		return -1;
+	if (!auxiliar){
+		printf("\nA lista esta vazia"); 
+		return -1;}
 		
 	for (int i = 0; i < lista->quant; i++) {
 		if (strcmp(auxiliar->nome, nome) == 0) {
@@ -238,16 +264,21 @@ int main(){
 	ListaGerenciada *lista = (ListaGerenciada*)malloc(sizeof(ListaGerenciada));
 	iniciaListaVazia(lista);
 	
-	printf("Bem vindo!");
+	printf("Bem vindo!\n");
+	printf("\n >>> Multilista Alunos/Disciplinas! <<< \n\n\n\n");
+	
 	do {
+		printf("\n");
+		system("pause");
+		system("cls");
 		printf("\nCadastrar aluno..........................1\n");
 		printf("Cadastrar disciplina de aluno............2\n");
 		printf("Remover aluno............................3\n");
 		printf("Exibir lista de alunos cadastrados.......4\n");
 		printf("Exibir historico de aluno especifico.....5\n");
 		printf("Sair.....................................0\n");
-		printf("Insura sua opcao: ");
-		scanf("%d", &opcao);
+		printf("Insira sua opcao: ");
+		scanf(" %d", &opcao);
 		
 		switch(opcao) {
 			case(1):
@@ -273,6 +304,16 @@ int main(){
 				break;
 		}
 	} while (opcao != 0);
+	
+	// quando o programa encerra ele desaloca a lista.
+	Aluno *proximo, *atual = lista->inicio;
+	while(atual != NULL){
+		proximo = atual->proximo;
+		deletaDisciplinas(atual);
+		free(atual);
+		atual = proximo;
+	}
+	free(lista);
 	return 0;
 }
 
