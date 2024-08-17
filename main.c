@@ -33,17 +33,14 @@ void iniciaListaVazia(ListaGerenciada *lista) {
 }
 
 void caixaBaixa(char *string) {
-	for (int i = 0;string[i] != '\0'; i++) {
+	for (int i = 0;string[i] != '\0'; i++) 
 		string[i] = tolower(string[i]);
-	}
 }
 
-// essa funcao é usada para desalocar a memoria das disciplinas quando 
-// um aluno é excluido
+// desalocar a memoria das disciplinas quando um aluno é excluido
 int deletaDisciplinas(Aluno *aluno) {
 	Disciplina *auxiliar = aluno->disciplinas;
-	if (!auxiliar)
-		return -1;
+	if (!auxiliar)  return -1;
 		
 	for (int i = 0; i < aluno->quantidadeDeDisciplinas; i++) {
 		free(aluno->disciplinas);
