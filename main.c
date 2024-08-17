@@ -88,7 +88,6 @@ int cadastrarAluno(ListaGerenciada *lista) {
 			free(aluno);
 			return -1;}
 		else if (strcmp(aluno->nome, atual->nome) < 0){
-			printf("Aluno adicionado!");
 			aluno->anterior = atual->anterior;
 			aluno->proximo = atual;
 			if(atual->anterior != NULL)
@@ -96,7 +95,7 @@ int cadastrarAluno(ListaGerenciada *lista) {
 			else lista->inicio = aluno;
 			atual->anterior = aluno;
 			lista->quant++;
-			printf("\nAluno for cadastrado!");
+			printf("\nAluno foi cadastrado!");
 			return 1;}
 		atual = atual->proximo;
 	}
@@ -196,15 +195,14 @@ int cadastrarDisciplina(ListaGerenciada *lista) {
 	strcpy(novaDisciplina->situacao,sit);
 	auxiliar->quantidadeDeDisciplinas++;
 	
-	Disciplina *atual = auxiliar->disciplinas;
 	//não há disciplinas cadastradas para esse aluno
-	if(atual ==NULL){
+	if(auxiliar->disciplinas == NULL){
 		novaDisciplina->proximo = NULL;
-		atual = novaDisciplina;
+		auxiliar->disciplinas = novaDisciplina;
 		auxiliar->disciplinasFim = novaDisciplina;}
 	else{
-		novaDisciplina->proximo = atual;
-		atual = novaDisciplina;}
+		novaDisciplina->proximo = auxiliar->disciplinas;
+		auxiliar->disciplinas= novaDisciplina;}
 	return 1;
 }
 
@@ -239,14 +237,17 @@ int exibirDisciplinas(Disciplina *disciplinas, int n) { // usada em exibirHistor
 }
 
 int exibirHistoricoDeAluno(ListaGerenciada *lista) {
-	char nome[21];
+	char nome[50];
 	printf("Insira o nome do aluno que deseja checar: ");
-	scanf(" %s", nome);
+	fflush(stdin);
+	fgets(nome, sizeof(nome), stdin);
 	caixaBaixa(nome);
 	
+	//lista vazia
 	Aluno *auxiliar = lista->inicio;
-	if (!auxiliar) 
-		return -1;
+	if (!auxiliar){
+		printf("\nA lista esta vazia"); 
+		return -1;}
 		
 	for (int i = 0; i < lista->quant; i++) {
 		if (strcmp(auxiliar->nome, nome) == 0) {
@@ -267,6 +268,7 @@ int main(){
 	printf("\n >>> Multilista Alunos/Disciplinas! <<< \n\n\n\n");
 	
 	do {
+		printf("\n");
 		system("pause");
 		system("cls");
 		printf("\nCadastrar aluno..........................1\n");
