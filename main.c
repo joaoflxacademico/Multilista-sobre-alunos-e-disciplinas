@@ -188,10 +188,10 @@ int cadastrarDisciplina(ListaGerenciada *lista) {
 	
 	char sit[3]; // estado auxiliar
 	//estrutura de decisão baseada na precedência: TR-> RF -> RM se nenhum desses AP
-	if(novaDisciplina->percentualDePresenca == 0)  		strcpy(sit,"TR");
+	if(novaDisciplina->percentualDePresenca == 0)       strcpy(sit,"TR");
 	else if(novaDisciplina->percentualDePresenca < 70)  strcpy(sit,"RF");
-	else if(novaDisciplina->nota < 5)  				    strcpy(sit,"RM");
-	else 												strcpy(sit,"AP");
+	else if(novaDisciplina->nota < 5)  		    strcpy(sit,"RM");
+	else 						    strcpy(sit,"AP");
 	strcpy(novaDisciplina->situacao,sit);
 	auxiliar->quantidadeDeDisciplinas++;
 	
