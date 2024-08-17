@@ -191,7 +191,8 @@ int exibirAlunosCadastrados(ListaGerenciada *lista) {
 		
 	printf("\n----Alunos Cadastrados----\n");
 	for (int i = 0; i < lista->quant; i++) {
-		printf("[%d]%s\n", i, auxiliar->nome);
+		printf("[%d]%s", i, auxiliar->nome);
+		printf(",%s", auxiliar->matricula);
 		auxiliar = auxiliar->proximo;
 	}
 	return 1;
