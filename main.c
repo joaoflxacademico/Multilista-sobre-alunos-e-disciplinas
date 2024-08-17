@@ -39,15 +39,18 @@ void caixaBaixa(char *string) {
 
 // desalocar a memoria das disciplinas quando um aluno é excluido
 int deletaDisciplinas(Aluno *aluno) {
-	Disciplina *auxiliar = aluno->disciplinas;
-	if (!auxiliar)  return -1;
+	Disciplina *proximo, *atual = aluno->disciplinas;
+	if (!atual)  return -1;
 		
-	for (int i = 0; i < aluno->quantidadeDeDisciplinas; i++) {
-		free(aluno->disciplinas);
-		auxiliar = auxiliar->proximo;
-		aluno->disciplinas = auxiliar;
+	while(atual != NULL){
+		proximo = atual->proximo;
+		free(atual);
+		atual = proximo;
 	}
-	free(auxiliar);
+	
+	aluno->disciplinas = NULL;
+	aluno->quantidadeDeDisciplinas = 0;
+	
 	return 1;
 }
 
