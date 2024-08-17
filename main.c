@@ -68,20 +68,45 @@ int cadastrarAluno(ListaGerenciada *lista) {
 	aluno->media = 0;
 	aluno->quantidadeDeDisciplinas = 0;
 	aluno->disciplinas = NULL;
+	aluno->disciplinasFim = NULL;
 		
+	
 	if (lista->quant == 0) {
 		aluno->anterior = NULL;
 		aluno->proximo = NULL;
 		lista->inicio = aluno;
 		lista->fim = aluno;
+		lista->quant++;
+		printf("\nAluno foi cadastrado!");
+		return 1;
 	}
-	else {
-		aluno->anterior = lista->fim;
-		aluno->proximo = NULL;
-		lista->fim->proximo = aluno;
-		lista->fim = aluno;
+	
+	Aluno *atual = lista->inicio;
+	while(atual!= NULL){
+		if(strcmp(aluno->nome, atual->nome) == 0){
+			printf("\n Aluno ja cadastrado!");
+			free(aluno);
+			return -1;}
+		else if (strcmp(aluno->nome, atual->nome) < 0){
+			printf("Aluno adicionado!");
+			aluno->anterior = atual->anterior;
+			aluno->proximo = atual;
+			if(atual->anterior != NULL)
+				atual->anterior->proximo = aluno;
+			else lista->inicio = aluno;
+			atual->anterior = aluno;
+			lista->quant++;
+			printf("\nAluno for cadastrado!");
+			return 1;}
+		atual = atual->proximo;
 	}
+	
+	// se chegar ao final da lista
+	aluno->anterior = lista->fim;
+	aluno->proximo = NULL;
 	lista->quant++;
+	lista->fim->proximo = aluno;
+	lista->fim = aluno;
 	return 1;
 }
 
@@ -190,8 +215,8 @@ int exibirAlunosCadastrados(ListaGerenciada *lista) {
 		
 	printf("\n----Alunos Cadastrados----\n");
 	for (int i = 0; i < lista->quant; i++) {
-		printf("[%d]%s", i, auxiliar->nome);
-		printf(",%s", auxiliar->matricula);
+		printf("\n[%d] -> %s", i, auxiliar->nome);
+		printf("- %s\n", auxiliar->matricula);
 		auxiliar = auxiliar->proximo;
 	}
 	return 1;
@@ -251,7 +276,7 @@ int main(){
 		printf("Exibir historico de aluno especifico.....5\n");
 		printf("Sair.....................................0\n");
 		printf("Insira sua opcao: ");
-		scanf("%d", &opcao);
+		scanf(" %d", &opcao);
 		
 		switch(opcao) {
 			case(1):
