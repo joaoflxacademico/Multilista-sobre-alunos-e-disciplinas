@@ -158,7 +158,6 @@ int cadastrarDisciplina(ListaGerenciada *lista) {
 	        }
 	    }
 	}
-	caixaBaixa(novaDisciplina->situacao);
 	
 	Aluno *auxiliar = lista->inicio;
 	if (!auxiliar)
