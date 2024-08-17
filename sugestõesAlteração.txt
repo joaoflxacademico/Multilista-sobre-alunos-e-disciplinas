@@ -1,0 +1,9 @@
+SUGESTÕES DE ALTERAÇÃO:
+
+
+-> Adicionar função insereAlunoOrdenado()
+
+
+Alterações de lógica:
+
+-> insere a disciplina por padrão no início em vez de no fim. Não existe ordenação de disciplinas já que elas podem estar ordenadas por nome ou por período, presumindo-se que modificações no código vão adicionar matérias mais recentes é melhor uma noção de FILO. Além de facilitar a implementação do código.

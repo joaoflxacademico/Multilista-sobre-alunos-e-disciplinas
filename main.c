@@ -33,7 +33,7 @@ void iniciaListaVazia(ListaGerenciada *lista) {
 }
 
 void caixaBaixa(char *string) {
-	for (int i = 0; i < string[i]; i++) {
+	for (int i = 0;string[i] != '\0'; i++) {
 		string[i] = tolower(string[i]);
 	}
 }
@@ -60,7 +60,8 @@ int cadastrarAluno(ListaGerenciada *lista) {
 		return -1;
 	
 	printf("Insira o nome do aluno: ");
-	scanf(" %s", aluno->nome);
+	fflush(stdin);
+	fgets(aluno->nome, sizeof(aluno->nome), stdin);
 	caixaBaixa(aluno->nome);
 	printf("Insira a matricula do aluno(xxxyyyzzz): ");
 	scanf(" %s", aluno->matricula);
@@ -87,7 +88,8 @@ int cadastrarAluno(ListaGerenciada *lista) {
 int removerAluno(ListaGerenciada *lista) {
 	char nome[21];
 	printf("Insira o nome do aluno que deseja remover: ");
-	scanf(" %s", nome);
+	fflush(stdin);
+	fgets(nome, sizeof(nome), stdin);
 	caixaBaixa(nome);
 	
 	Aluno *auxiliar = lista->inicio;
@@ -129,15 +131,30 @@ int removerAluno(ListaGerenciada *lista) {
 int cadastrarDisciplina(ListaGerenciada *lista) {
 	char nome[21];
 	printf("Insira o nome do aluno em que deseja cadastrar a disciplina: ");
-	scanf(" %s", nome);
+	fflush(stdin);
+	fgets(nome, sizeof(nome), stdin);
 	caixaBaixa(nome);
 	
+	// sem alunos para cadastrar disciplina
+	Aluno *auxiliar = lista->inicio;
+	if (!auxiliar)
+		return -1; 
+	
+	// retorna em auxiliar, o aluno escolhido
+	while(auxiliar != NULL){
+		if (strcmp(auxiliar->nome, nome) == 0) break;
+		else 	auxiliar = auxiliar->proximo;}
+	
+	if(auxiliar == NULL) return -1; // aluno não encontrado
+	
+	// se o aluno foi encontrado aloca uma memoria, evitando memory leaks
 	Disciplina *novaDisciplina = (Disciplina*)malloc(sizeof(Disciplina));
 	if (!novaDisciplina) 
 		return -1;
-		
+	
 	printf("Insira o nome da disciplina: ");
-	scanf(" %s", novaDisciplina->nome);
+	fflush(stdin);
+	fgets(novaDisciplina->nome, sizeof(novaDisciplina->nome),stdin);
 	printf("Insira o periodo(aaaa.x): ");
 	scanf(" %s", novaDisciplina->periodo);
 	printf("Insira a nota do aluno: ");
@@ -145,42 +162,25 @@ int cadastrarDisciplina(ListaGerenciada *lista) {
 	printf("Insira o percentual de presenca: ");
 	scanf("%f", &novaDisciplina->percentualDePresenca);
 	
-	if( novaDisciplina->nota >= 5 && novaDisciplina->percentualDePresenca > 70 ){
-	    strcpy(novaDisciplina->situacao,"AP");
-	}else{
-	    if(novaDisciplina->nota < 5){
-	        strcpy(novaDisciplina->situacao,"RM");
-	    }else{
-	        if(novaDisciplina->percentualDePresenca == 0){
-	            strcpy(novaDisciplina->situacao,"TR");
-	        }else{
-	            strcpy(novaDisciplina->situacao,"RF");
-	        }
-	    }
-	}
+	char sit[3]; // estado auxiliar
+	//estrutura de decisão baseada na precedência: TR-> RF -> RM se nenhum desses AP
+	if(novaDisciplina->percentualDePresenca == 0)  		strcpy(sit,"TR");
+	else if(novaDisciplina->percentualDePresenca < 70)  strcpy(sit,"RF");
+	else if(novaDisciplina->nota < 5)  				    strcpy(sit,"RM");
+	else 												strcpy(sit,"AP");
+	strcpy(novaDisciplina->situacao,sit);
+	auxiliar->quantidadeDeDisciplinas++;
 	
-	Aluno *auxiliar = lista->inicio;
-	if (!auxiliar)
-		return -1;
-	
-	for (int i = 0; i < lista->quant; i++) {
-		if (strcmp(auxiliar->nome, nome) == 0) {
-			novaDisciplina->proximo = NULL;
-			if (auxiliar->quantidadeDeDisciplinas == 0) {
-				auxiliar->disciplinas = novaDisciplina;
-				auxiliar->disciplinasFim = novaDisciplina;
-			}
-			// caso nao seja a primeira disciplina, sera adicionada sempre no final
-			else {
-				auxiliar->disciplinasFim->proximo = novaDisciplina;
-				auxiliar->disciplinasFim = novaDisciplina;
-			}
-			auxiliar->quantidadeDeDisciplinas++;
-			return 1; // encontrou o aluno
-		} 
-		auxiliar = auxiliar->proximo;
-	}
-	return -1; // o aluno nao foi encontrado na lista
+	Disciplina *atual = auxiliar->disciplinas;
+	//não há disciplinas cadastradas para esse aluno
+	if(atual ==NULL){
+		novaDisciplina->proximo = NULL;
+		atual = novaDisciplina;
+		auxiliar->disciplinasFim = novaDisciplina;}
+	else{
+		novaDisciplina->proximo = atual;
+		atual = novaDisciplina;}
+	return 1;
 }
 
 int exibirAlunosCadastrados(ListaGerenciada *lista) {
